@@ -209,14 +209,9 @@ def introspect_schema(endpoint: str, session: Session) -> Schema:
             "variables": variables
         }
     )
-    try:
-        introspection_response.raise_for_status()
-        schema_json = introspection_response.json()
-        logger.debug("Successfully received schema.")
-        schema = Schema(schema_json)
-        logger.debug("Successfully introspected schema.")
-        return schema
-    except Exception as e:
-        logger.warning("Unable to introspect schema.")
-        logger.exception(e)
-        return Schema({})
+    introspection_response.raise_for_status()
+    schema_json = introspection_response.json()
+    logger.debug("Successfully received schema.")
+    schema = Schema(schema_json)
+    logger.debug("Successfully introspected schema.")
+    return schema

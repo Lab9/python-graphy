@@ -12,23 +12,23 @@ class Client(object):
         self._query_services = None
         self._mutation_services = None
 
-        if introspect:
-            from graphy import loaders
-            self.schema = loaders.introspect_schema(self.endpoint, self.session)
-        else:
-            from graphy.models import EMPTY_SCHEMA
-            self.schema = EMPTY_SCHEMA
+        from graphy import loaders
+        self.schema = loaders.introspect_schema(self.endpoint, self.session)
 
     @property
-    def query(self) -> "QueryServices":
+    def query(self) -> "QueryServiceProxy":
         if self._query_services is None:
-            from graphy.models import QueryServices
-            self._query_services = QueryServices(self)
+            from graphy.models import QueryServiceProxy
+            self._query_services = QueryServiceProxy(self)
         return self._query_services
 
     @property
-    def mutation(self) -> "MutationServices":
+    def mutation(self) -> "MutationServiceProxy":
         if self._mutation_services is None:
-            from graphy.models import MutationServices
-            self._mutation_services = MutationServices(self)
+            from graphy.models import MutationServiceProxy
+            self._mutation_services = MutationServiceProxy(self)
         return self._mutation_services
+
+    @property
+    def subscription(self):
+        raise Exception("The subscription method is yet not supported.")

@@ -1,3 +1,4 @@
+from .builder import fields
 from .client import Client
 from .models import Schema
 

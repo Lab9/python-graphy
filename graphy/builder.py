@@ -1,5 +1,7 @@
 from typing import Dict, Union, List, Tuple
 
+from graphy.models import SelectionField
+
 
 class GraphQLQueryBuilder:
     def __init__(self):
@@ -9,18 +11,8 @@ class GraphQLQueryBuilder:
         self.operation_field: str = ""
         self.fragment_field: str = ""
 
-    def fields(self, fields: Union[List[str], Tuple[str], str], name: str = '', condition_expression: str = ''):
-        if isinstance(fields, str):
-            fields = [fields]
-        else:
-            fields = list(fields)
-        query = '{ ' + " ".join(fields) + ' }'
-        if name != '':
-            if condition_expression != '':
-                query = f'{name} {condition_expression} {query}'
-            else:
-                query = f'{name} {query}'
-        self.return_field = query
+    def fields(self, selection: Tuple[SelectionField]):
+        self.return_field = "{ " + " ".join([str(s) for s in selection if s]) + " }"
         return self
 
     def query(self, name: str, alias: str = '', params: Dict[str, Union[str, int]] = None):
@@ -31,7 +23,7 @@ class GraphQLQueryBuilder:
         if params != {}:
             for key, value in params.items():
                 inputs.append(f'{key}: {value}')
-            self.query_field = self.query_field + '(' + ", ".join(inputs) + ')'
+            self.query_field = self.query_field + ' (' + ", ".join(inputs) + ') '
         if alias != '':
             self.query_field = f'{alias}: {self.query_field}'
 
@@ -52,7 +44,7 @@ class GraphQLQueryBuilder:
             if params != {}:
                 for key, value in params.items():
                     inputs.append(f'{key}: {value}')
-                self.operation_field = self.operation_field + '(' + ", ".join(inputs) + ')'
+                self.operation_field = self.operation_field + ' (' + ", ".join(inputs) + ') '
 
         if len(queries) != 0:
             self.object = self.operation_field + ' { ' + " ".join(queries) + ' }'
@@ -78,24 +70,25 @@ class GraphQLQueryBuilder:
         return helpers.remove_duplicate_spaces(self.object)
 
 
-def build_query(operation_name: str, params: Dict = None, fields: Union[List[str], Tuple[str], str] = None) -> str:
+def build_query(operation_name: str, params: Dict = None, selection: Union[List[str], Tuple[str], str] = None) -> str:
     query = GraphQLQueryBuilder().operation("query")
-    return build_query_str(query, operation_name, params, fields)
+    return build_query_str(query, operation_name, params, selection)
 
 
-def build_mutation(operation_name: str, params: Dict = None, fields: Union[List[str], Tuple[str], str] = None) -> str:
+def build_mutation(operation_name: str, params: Dict = None,
+                   selection: Union[List[str], Tuple[str], str] = None) -> str:
     query = GraphQLQueryBuilder().operation("mutation")
-    return build_query_str(query, operation_name, params, fields)
+    return build_query_str(query, operation_name, params, selection)
 
 
 def build_query_str(
         query: GraphQLQueryBuilder,
         operation_name: str,
         params: Dict[str, Union[str, int, float, bool]] = None,
-        fields: Union[List[str], Tuple[str], str] = None
+        selection: Tuple[SelectionField] = None
 ) -> str:
-    if fields:
-        query = query.fields(fields)
+    if selection:
+        query = query.fields(selection)
 
     if params:
         query = query.query(operation_name, params={key: map_value(value) for key, value in params.items()})
@@ -111,3 +104,12 @@ def map_value(value: Union[str, int, float, bool]) -> str:
         return "true" if value else "false"
     else:
         return str(value)
+
+
+def fields(*args, **kwargs) -> Tuple[SelectionField]:
+    result = []
+    for arg in args:
+        result.append(SelectionField(str(arg)))
+    for key, value in kwargs.items():
+        result.append(SelectionField(key, children=[v if isinstance(v, SelectionField) else SelectionField(str(v)) for v in value if v]))
+    return tuple(result)
