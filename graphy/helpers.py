@@ -3,28 +3,30 @@ from typing import Dict, List, Union, Tuple
 from graphy.models import Type, Directive, Operation, Argument, TypeDefer, SelectionField
 
 
-def parse_query_type(raw_schema: Dict) -> str:
+def parse_query_type(raw_schema: Dict) -> Union[str, None]:
     query_type = raw_schema.get("queryType", {})
     if not query_type:
-        return "Query"
-    return query_type.get("name", "Query")
+        return None
+    return query_type.get("name")
 
 
-def parse_mutation_type(raw_schema: Dict) -> str:
+def parse_mutation_type(raw_schema: Dict) -> Union[str, None]:
     query_type = raw_schema.get("mutationType", {})
     if not query_type:
-        return "Mutation"
-    return query_type.get("name", "Mutation")
+        return None
+    return query_type.get("name")
 
 
-def parse_subscription_type(raw_schema: Dict) -> str:
+def parse_subscription_type(raw_schema: Dict) -> Union[str, None]:
     query_type = raw_schema.get("subscriptionType", {})
     if not query_type:
-        return "Subscription"
-    return query_type.get("name", "Subscription")
+        return None
+    return query_type.get("name")
 
 
 def parse_operations(raw_types: Dict[str, Type], query_type_name: str) -> List[Operation]:
+    if not query_type_name:
+        return []
     query_type = raw_types.get(query_type_name)
     if not query_type:
         return []
@@ -67,9 +69,12 @@ def map_variables_to_types(variables: Dict, operation: Operation) -> Dict[str, s
     result = {}
     for key in variables.keys():
         arg = operation.arguments.get(key)
-        if not key:
+        if not arg:
             raise ValueError(f"Argument '{key}' is not supported by operation '{operation.name}'.")
-        result[f"${key}"] = arg.type.name
+        if is_non_null(arg.type):
+            result[f"${key}"] = find_defer_name_recursively(arg.type) + "!"
+        else:
+            result[f"${key}"] = find_defer_name_recursively(arg.type)
     return result
 
 
@@ -92,7 +97,7 @@ def find_selectable_fields(base_type_name: str, all_types: Dict[str, Type]) -> T
         if not field:
             continue
         field_type = field.type
-        field_name = find_defer_type_recursively(field_type)
+        field_name = find_defer_name_recursively(field_type)
         if not field_name:
             to_add.append(field.name)
         else:
@@ -101,10 +106,14 @@ def find_selectable_fields(base_type_name: str, all_types: Dict[str, Type]) -> T
     return builder.fields(*to_add)
 
 
-def find_defer_type_recursively(defer: TypeDefer) -> Union[str, None]:
+def is_non_null(defer: TypeDefer) -> bool:
+    return defer.kind == "NON_NULL"
+
+
+def find_defer_name_recursively(defer: TypeDefer) -> Union[str, None]:
     if not defer:
         return None
     if defer.name is None:
-        return find_defer_type_recursively(defer.of_type)
+        return find_defer_name_recursively(defer.of_type)
     else:
         return defer.name
