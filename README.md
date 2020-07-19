@@ -32,4 +32,4 @@ response: Response = client.query.country(select=fields("name", "capital"), wher
 
 ## Acknowledgments
 
-* Inspired by [Zeep](https://github.com/mvantellingen/python-zeep)
+* Heavily inspired by [Zeep](https://github.com/mvantellingen/python-zeep)
