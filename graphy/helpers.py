@@ -1,6 +1,6 @@
-from typing import Dict, List, Union, Tuple
+from typing import Dict, List, Union
 
-from graphy.models import Type, Directive, Operation, Argument, TypeDefer, SelectionField
+from graphy.schema import Type, Directive, Operation, Argument, TypeDefer
 
 
 def parse_query_type(raw_schema: Dict) -> Union[str, None]:
@@ -71,39 +71,8 @@ def map_variables_to_types(variables: Dict, operation: Operation) -> Dict[str, s
         arg = operation.arguments.get(key)
         if not arg:
             raise ValueError(f"Argument '{key}' is not supported by operation '{operation.name}'.")
-        if is_non_null(arg.type):
-            result[f"${key}"] = find_defer_name_recursively(arg.type) + "!"
-        else:
-            result[f"${key}"] = find_defer_name_recursively(arg.type)
+        result[f"${key}"] = arg
     return result
-
-
-def is_native_type(n_type: Union[str, Type, TypeDefer]) -> bool:
-    if isinstance(n_type, Type):
-        string_type = n_type.name
-    elif isinstance(n_type, TypeDefer):
-        string_type = n_type.name
-    else:
-        string_type = str(n_type)
-    return string_type.lower() in ("int", "float", "string", "boolean", "id")
-
-
-def find_selectable_fields(base_type_name: str, all_types: Dict[str, Type]) -> Tuple[SelectionField]:
-    type_to_check = all_types.get(base_type_name)
-    if not type_to_check:
-        return []
-    to_add = []
-    for field in type_to_check.fields:
-        if not field:
-            continue
-        field_type = field.type
-        field_name = find_defer_name_recursively(field_type)
-        if not field_name:
-            to_add.append(field.name)
-        else:
-            to_add += find_selectable_fields(field_name, all_types)
-    from graphy import builder
-    return builder.fields(*to_add)
 
 
 def is_non_null(defer: TypeDefer) -> bool:
@@ -117,3 +86,13 @@ def find_defer_name_recursively(defer: TypeDefer) -> Union[str, None]:
         return find_defer_name_recursively(defer.of_type)
     else:
         return defer.name
+
+
+def adapt_arguments(args: Dict[str, Argument]) -> Dict[str, str]:
+    result = {}
+    for name, arg in args.items():
+        type_name = find_defer_name_recursively(arg.type)
+        if is_non_null(arg.type):
+            type_name += "!"
+        result[name] = type_name
+    return result

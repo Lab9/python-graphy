@@ -18,14 +18,14 @@ class Client(object):
     @property
     def query(self) -> "QueryServiceProxy":
         if self._query_services is None:
-            from graphy.models import QueryServiceProxy
+            from graphy.proxy import QueryServiceProxy
             self._query_services = QueryServiceProxy(self)
         return self._query_services
 
     @property
     def mutation(self) -> "MutationServiceProxy":
         if self._mutation_services is None:
-            from graphy.models import MutationServiceProxy
+            from graphy.proxy import MutationServiceProxy
             self._mutation_services = MutationServiceProxy(self)
         return self._mutation_services
 

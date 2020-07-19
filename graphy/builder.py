@@ -1,6 +1,6 @@
 from typing import Dict, Union, List, Tuple
 
-from graphy.models import SelectionField
+from graphy.schema import SelectionField
 
 
 class GraphQLQueryBuilder:
@@ -111,5 +111,7 @@ def fields(*args, **kwargs) -> Tuple[SelectionField]:
     for arg in args:
         result.append(SelectionField(str(arg)))
     for key, value in kwargs.items():
-        result.append(SelectionField(key, children=[v if isinstance(v, SelectionField) else SelectionField(str(v)) for v in value if v]))
+        result.append(SelectionField(key,
+                                     children=[v if isinstance(v, SelectionField) else SelectionField(str(v)) for v in
+                                               value if v]))
     return tuple(result)

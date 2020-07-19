@@ -1,7 +1,7 @@
 from requests import Session
 
 from graphy.logger import logger
-from graphy.models import Schema
+from graphy.schema import Schema
 
 
 def introspect_schema(endpoint: str, session: Session) -> Schema:
