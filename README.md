@@ -1,6 +1,6 @@
 # Graphy: Python GraphQL Client
 
-A fast and modern graphql client library designed with simplicity in mind
+A fast and modern graphql client library designed with simplicity in mind.
 
 ## Getting Started
 
@@ -11,8 +11,6 @@ You can download it from https://pypi.org/
 ```shell script
 pip install python-graphy
 ```
-
-End with an example of getting some data out of the system or using it for a little demo
 
 ### Usage
 
