@@ -11,7 +11,7 @@ README = (HERE / "README.md").read_text()
 # This call to setup() does all the work
 setup(
     name="python-graphy",
-    version="0.0.1",
+    version="0.0.2",
     description="A fast and modern graphql client library designed with simplicity in mind.",
     long_description=README,
     long_description_content_type="text/markdown",

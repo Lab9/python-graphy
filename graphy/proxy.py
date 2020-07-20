@@ -84,6 +84,8 @@ class MutationOperationProxy(OperationProxy):
     def __call__(self, select: Tuple[SelectionField] = None, data: Dict = None, *args, **kwargs) -> Response:
         if data is None:
             raise ValueError("No Data specified")
+        if select is None:
+            select = tuple()
         from graphy.builder import GraphQLQueryBuilder
         from graphy import helpers
         query_builder = GraphQLQueryBuilder()

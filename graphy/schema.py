@@ -57,7 +57,7 @@ class Type:
         self.name = raw_type.get("name")
         self.description = raw_type.get("description")
         self.fields: List[TypeField] = [TypeField(f) for f in raw_type.get("fields", []) or [] if f]
-        self.input_fields = raw_type.get("inputFields")
+        self.input_fields = [InputField(f) for f in raw_type.get("inputFields", []) or [] if f]
         self.interfaces = raw_type.get("interfaces")
         self.enum_values = raw_type.get("enumValues")
         self.possible_types = raw_type.get("possibleTypes")
@@ -72,6 +72,14 @@ class TypeField:
         self.type: TypeDefer = TypeDefer(raw_field.get("type")) if raw_field.get("type") is not None else None
         self.is_deprecated: bool = raw_field.get("isDeprecated")
         self.deprecation_reason: str = raw_field.get("deprecationReason")
+
+
+class InputField:
+    def __init__(self, raw_input: Dict):
+        self.name = raw_input.get("name")
+        self.description = raw_input.get("description")
+        self.type: TypeDefer = TypeDefer(raw_input.get("type")) if raw_input.get("type") is not None else None
+        self.default_value = raw_input.get("defaultValue")
 
 
 class SelectionField:

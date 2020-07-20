@@ -2,11 +2,10 @@ from requests import Session
 
 
 class Client(object):
-    def __init__(self, endpoint: str, introspect=True, session=None):
+    def __init__(self, endpoint: str, session=None):
         if not endpoint:
             raise ValueError("No Endpoint specified.")
         self.endpoint = endpoint
-        self.introspect = introspect
         self.session: Session = session if session is not None else Session()
 
         self._query_services = None

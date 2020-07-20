@@ -12,6 +12,10 @@ class GraphQLQueryBuilder:
         self.fragment_field: str = ""
 
     def fields(self, selection: Tuple[SelectionField]):
+        if selection is None or len(selection) == 0:
+            self.return_field = ""
+            return self
+
         self.return_field = "{ " + " ".join([str(s) for s in selection if s]) + " }"
         return self
 
