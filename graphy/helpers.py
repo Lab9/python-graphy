@@ -1,6 +1,6 @@
-from typing import Dict, List, Union
+from typing import Dict, List, Union, Tuple
 
-from graphy.schema import Type, Directive, Operation, Argument, TypeDefer
+from graphy.schema import Type, Directive, Operation, Argument, TypeDefer, SelectionField
 
 
 def parse_query_type(raw_schema: Dict) -> Union[str, None]:
@@ -30,7 +30,7 @@ def parse_operations(raw_types: Dict[str, Type], query_type_name: str) -> List[O
     query_type = raw_types.get(query_type_name)
     if not query_type:
         return []
-    return [Operation(f) for f in query_type.fields]
+    return [Operation(f, raw_types) for f in query_type.fields]
 
 
 def parse_types(schema_types: List[Dict]) -> Dict[str, Type]:
@@ -76,7 +76,23 @@ def map_variables_to_types(variables: Dict, operation: Operation) -> Dict[str, s
 
 
 def is_non_null(defer: TypeDefer) -> bool:
-    return defer.kind == "NON_NULL"
+    return defer and defer.kind == "NON_NULL"
+
+
+def is_list(defer: TypeDefer) -> bool:
+    return defer and defer.kind == "LIST"
+
+
+def is_object(defer: TypeDefer) -> bool:
+    return defer and defer.kind == "OBJECT"
+
+
+def is_input_object(defer: TypeDefer) -> bool:
+    return defer and defer.kind == "INPUT_OBJECT"
+
+
+def is_scalar(defer: TypeDefer) -> bool:
+    return defer and defer.kind == "SCALAR"
 
 
 def find_defer_name_recursively(defer: TypeDefer) -> Union[str, None]:
@@ -96,3 +112,31 @@ def adapt_arguments(args: Dict[str, Argument]) -> Dict[str, str]:
             type_name += "!"
         result[name] = type_name
     return result
+
+
+def adapt_return_fields(field_type: TypeDefer, all_types: Dict[str, Type]) -> Tuple[SelectionField]:
+    base_return_type_name = find_defer_name_recursively(field_type)
+    all_fields = __recursively_find_selection_fields(base_return_type_name, all_types)
+    return all_fields if len(all_fields) != 0 else None
+
+
+def __recursively_find_selection_fields(
+        type_name: str,
+        all_types: Dict[str, Type]
+) -> Tuple[SelectionField]:
+    field_type: Type = all_types.get(type_name)
+    if field_type is None:
+        return tuple()
+
+    args = []
+    kwargs = {}
+
+    for field in field_type.fields:
+        if field is None:
+            continue
+        field_name = field.name
+        if is_scalar(field.type):
+            args.append(field_name)
+
+    from graphy import builder
+    return builder.fields(*args, **kwargs)

@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 
 class Schema:
@@ -19,11 +19,12 @@ class Schema:
 
 
 class Operation:
-    def __init__(self, field: "TypeField"):
+    def __init__(self, field: "TypeField", all_types: "Dict[str, Type]"):
         from graphy import helpers
         self.name = field.name
         self.description = field.description
         self.arguments = helpers.adapt_arguments(field.args)
+        self.return_fields: Tuple[SelectionField] = helpers.adapt_return_fields(field.type, all_types)
         self.return_type = field.type
 
 
