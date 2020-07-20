@@ -74,6 +74,22 @@ response = client.query.pokemons(
 Using the fields method from `graphy` you can simply use `*args` and `**kwargs` for making deeper selections.
 By the way, you could stack this like forever.
 
+Last but not least, what if you don't know the fields you could select?
+Yup, we got you somewhat covered as well. The thing is, that due to performance issues,
+this package is not able to completely create a query that retrieves all fields for a Query.
+I have set the max depth to **50**. This allows to still send a query without selecting any fields
+but you won't get them all. If you want all, use the `fields` function defined above.
+
+```python
+from graphy import Client
+
+client = Client("https://graphql-pokemon.now.sh/")
+
+response = client.query.pokemons(where={"first": 10})
+
+# this gives you a good amount of data back.
+```
+
 ### Mutation
 I haven't found a real world example for making mutations without being authenticated,
 so here's a hypothetical one.
