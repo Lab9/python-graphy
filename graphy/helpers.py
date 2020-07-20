@@ -30,7 +30,7 @@ def parse_operations(raw_types: Dict[str, Type], query_type_name: str) -> List[O
     query_type = raw_types.get(query_type_name)
     if not query_type:
         return []
-    return [Operation(f, raw_types) for f in query_type.fields]
+    return [Operation(f) for f in query_type.fields]
 
 
 def parse_types(schema_types: List[Dict]) -> Dict[str, Type]:
@@ -117,16 +117,22 @@ def adapt_arguments(args: Dict[str, Argument]) -> Dict[str, str]:
 def adapt_return_fields(field_type: TypeDefer, all_types: Dict[str, Type]) -> Tuple[SelectionField]:
     base_return_type_name = find_defer_name_recursively(field_type)
     all_fields = __recursively_find_selection_fields(base_return_type_name, all_types)
-    return all_fields if len(all_fields) != 0 else None
+    return all_fields if all_fields is not None and len(all_fields) != 0 else None
+
+
+MAX_RECURSION_DEPTH = 50
 
 
 def __recursively_find_selection_fields(
         type_name: str,
-        all_types: Dict[str, Type]
+        all_types: Dict[str, Type],
+        curr_depth=0
 ) -> Tuple[SelectionField]:
+    if curr_depth >= MAX_RECURSION_DEPTH:
+        return None
     field_type: Type = all_types.get(type_name)
     if field_type is None:
-        return tuple()
+        return None
 
     args = []
     kwargs = {}
@@ -137,6 +143,14 @@ def __recursively_find_selection_fields(
         field_name = field.name
         if is_scalar(field.type):
             args.append(field_name)
+        elif is_list(field.type) or is_object(field.type):
+            sub_type = find_defer_name_recursively(field.type)
+            sub_fields = __recursively_find_selection_fields(sub_type, all_types, curr_depth=curr_depth + 1)
+            if sub_fields is not None:
+                kwargs[field_name] = sub_fields
 
     from graphy import builder
-    return builder.fields(*args, **kwargs)
+    return_fields = builder.fields(*args, **kwargs)
+    if return_fields is None or len(return_fields) == 0:
+        return None
+    return return_fields

@@ -19,13 +19,19 @@ class Schema:
 
 
 class Operation:
-    def __init__(self, field: "TypeField", all_types: "Dict[str, Type]"):
+    def __init__(self, field: "TypeField"):
         from graphy import helpers
         self.name = field.name
         self.description = field.description
         self.arguments = helpers.adapt_arguments(field.args)
-        self.return_fields: Tuple[SelectionField] = helpers.adapt_return_fields(field.type, all_types)
         self.return_type = field.type
+        self._return_fields: Tuple[SelectionField] = None
+
+    def get_return_fields(self, all_types: "Dict[str, Type]"):
+        if self._return_fields is None:
+            from graphy import helpers
+            self._return_fields = helpers.adapt_return_fields(self.return_type, all_types)
+        return self._return_fields
 
 
 class Directive:

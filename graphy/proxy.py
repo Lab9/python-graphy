@@ -53,7 +53,7 @@ class QueryOperationProxy(OperationProxy):
 
     def __call__(self, select: Tuple[SelectionField] = None, where: Dict = None, *args, **kwargs) -> Response:
         if select is None:
-            select = self.operation.return_fields
+            select = self.operation.get_return_fields(self.client.schema.types)
             if select is None:
                 raise ValueError("Missing field selection")
         from graphy.builder import GraphQLQueryBuilder

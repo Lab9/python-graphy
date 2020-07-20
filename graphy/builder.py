@@ -86,8 +86,12 @@ def map_value(value: Union[str, int, float, bool]) -> str:
 def fields(*args, **kwargs) -> Tuple[SelectionField]:
     result = []
     for arg in args:
+        if arg is None:
+            continue
         result.append(SelectionField(str(arg)))
     for key, value in kwargs.items():
+        if value is None:
+            continue
         result.append(
             SelectionField(
                 key,
