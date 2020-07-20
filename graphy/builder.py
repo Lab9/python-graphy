@@ -74,33 +74,6 @@ class GraphQLQueryBuilder:
         return helpers.remove_duplicate_spaces(self.object)
 
 
-def build_query(operation_name: str, params: Dict = None, selection: Union[List[str], Tuple[str], str] = None) -> str:
-    query = GraphQLQueryBuilder().operation("query")
-    return build_query_str(query, operation_name, params, selection)
-
-
-def build_mutation(operation_name: str, params: Dict = None,
-                   selection: Union[List[str], Tuple[str], str] = None) -> str:
-    query = GraphQLQueryBuilder().operation("mutation")
-    return build_query_str(query, operation_name, params, selection)
-
-
-def build_query_str(
-        query: GraphQLQueryBuilder,
-        operation_name: str,
-        params: Dict[str, Union[str, int, float, bool]] = None,
-        selection: Tuple[SelectionField] = None
-) -> str:
-    if selection:
-        query = query.fields(selection)
-
-    if params:
-        query = query.query(operation_name, params={key: map_value(value) for key, value in params.items()})
-    else:
-        query = query.query(operation_name)
-    return query.generate()
-
-
 def map_value(value: Union[str, int, float, bool]) -> str:
     if isinstance(value, str):
         return '"' + value + '"'
@@ -115,7 +88,10 @@ def fields(*args, **kwargs) -> Tuple[SelectionField]:
     for arg in args:
         result.append(SelectionField(str(arg)))
     for key, value in kwargs.items():
-        result.append(SelectionField(key,
-                                     children=[v if isinstance(v, SelectionField) else SelectionField(str(v)) for v in
-                                               value if v]))
+        result.append(
+            SelectionField(
+                key,
+                children=[v if isinstance(v, SelectionField) else SelectionField(str(v)) for v in value if v]
+            )
+        )
     return tuple(result)
