@@ -75,7 +75,7 @@ Using the fields method from `graphy` you can simply use `*args` and `**kwargs` 
 By the way, you could stack this like forever.
 
 ### Mutation
-I haven't found an real world example for making mutations without being authenticated,
+I haven't found a real world example for making mutations without being authenticated,
 so here's a hypothetical one.
 ```python
 from graphy import Client
