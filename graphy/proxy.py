@@ -19,8 +19,6 @@ class OperationProxy:
     def __call__(self, query: str, variables: Dict = None, operation_name: str = "", *args, **kwargs) -> Response:
         if variables is None:
             variables = {}
-        if operation_name == "":
-            operation_name = self.operation_name
         return self.client.session.post(
             self.client.endpoint,
             json={
