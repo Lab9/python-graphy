@@ -26,27 +26,11 @@ response: Response = client.query.pokemon(select=["id", "name"], where={"name": 
 
 ## Documentation
 The Documentation covers the following points:
-* [Custom Session](#custom-session)
 * [Query](#query)
 * [Mutation](#mutation)
 * [Subscription](#subscription)
-
-### Custom Session
-Sometimes you want your own custom session to be used for making requests.
-For example if you need to authenticate yourself with some sort of an api key.
-Therefor, you can pass it directly to the client.
-
-```python
-import requests
-
-from graphy import Client
-
-my_session = requests.sessions.session()
-
-my_session.headers["Authorization"] = "Bearer some-api-token"
-
-client = Client("https://foo.bar/", session=my_session)
-```
+* [Custom Session](#custom-session)
+* [CLI](#cli)
 
 ### Query
 Queries are the A and O of graphql and are as easy as:
@@ -104,6 +88,32 @@ Mind that the select keyword is optional in mutations but can still be passed by
 
 ### Subscription
 Subscriptions are not yet available
+
+### Custom Session
+Sometimes you want your own custom session to be used for making requests.
+For example if you need to authenticate yourself with some sort of an api key.
+Therefor, you can pass it directly to the client.
+
+```python
+import requests
+
+from graphy import Client
+
+my_session = requests.sessions.session()
+
+my_session.headers["Authorization"] = "Bearer some-api-token"
+
+client = Client("https://foo.bar/", session=my_session)
+```
+
+### CLI
+Graphy also provides a CLI for inspecting a schema.
+```shell script
+graphy --inspect "https://graphql-pokemon.now.sh/"
+
+# or short:
+# graphy -i "https://graphql-pokemon.now.sh/"
+```
 
 ## Authors
 
