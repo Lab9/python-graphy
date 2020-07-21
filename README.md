@@ -34,7 +34,7 @@ The Documentation covers the following points:
 * [Query](#query)
 * [Mutation](#mutation)
 * [Subscription](#subscription)
-* [Custom Session](#custom-session)
+* [Transporter](#transporter)
 * [CLI](#cli)
 
 ### Query
@@ -94,21 +94,39 @@ Mind that the select keyword is optional in mutations but can still be passed by
 ### Subscription
 Subscriptions are not yet available
 
-### Custom Session
+### Transporter
+For making requests, we use a transporter.
+
+If none is given, a new one will be created.
+
 Sometimes you want your own custom session to be used for making requests.
 For example if you need to authenticate yourself with some sort of an api key.
-Therefor, you can pass it directly to the client.
+Therefor, you can pass it directly to the transporter.
 
 ```python
 import requests
 
-from graphy import Client
+from graphy import Client, Transporter
 
 my_session = requests.sessions.session()
 
 my_session.headers["Authorization"] = "Bearer some-api-token"
 
-client = Client("https://foo.bar/", session=my_session)
+client = Client("https://foo.bar/", transporter=Transporter(session=my_session))
+```
+
+So why not create an asynchronous transporter as well?
+Making a request with the async transporter returns a `Promise[Response]` with the response as a value.
+Have a look at their [documentation](https://pypi.org/project/promise/).
+
+```python
+from graphy import Client, AsyncTransporter
+
+client = Client("https://graphql-pokemon.now.sh/", transporter=AsyncTransporter())
+
+client.query.pokemons(where={"first": 10})\
+    .then(lambda r: r.json(), None)\
+    .done(lambda j: print(j.get("data", {})), None)  # None represents the did_reject callback.
 ```
 
 ### CLI
@@ -121,9 +139,7 @@ graphy --inspect "https://graphql-pokemon.now.sh/"
 ```
 
 ## Authors
-
 * **Daniel Seifert** - *Initial work* - [Lab9](https://github.com/Lab9)
 
 ## Acknowledgments
-
 * Heavily inspired by [Zeep](https://github.com/mvantellingen/python-zeep)
