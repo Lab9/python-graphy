@@ -143,7 +143,7 @@ def __recursively_find_selection_fields(
         field_name = field.name
         if is_scalar(field.type):
             args.append(field_name)
-        elif is_list(field.type) or is_object(field.type):
+        elif is_list(field.type) or is_object(field.type) or is_non_null(field.type):
             sub_type = find_defer_name_recursively(field.type)
             sub_fields = __recursively_find_selection_fields(sub_type, all_types, curr_depth=curr_depth + 1)
             if sub_fields is not None:
