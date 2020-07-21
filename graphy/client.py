@@ -1,18 +1,18 @@
-from requests import Session
+from graphy.transport import Transporter
 
 
 class Client(object):
-    def __init__(self, endpoint: str, session=None):
+    def __init__(self, endpoint: str, transporter=None):
         if not endpoint:
             raise ValueError("No Endpoint specified.")
         self.endpoint = endpoint
-        self.session: Session = session if session is not None else Session()
+        self.transporter: Transporter = transporter if transporter is not None else Transporter()
 
         self._query_services = None
         self._mutation_services = None
 
         from graphy import loaders
-        self.schema = loaders.introspect_schema(self.endpoint, self.session)
+        self.schema = loaders.introspect_schema(self.endpoint, self.transporter.session)
 
     @property
     def query(self) -> "QueryServiceProxy":

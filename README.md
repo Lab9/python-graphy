@@ -2,6 +2,11 @@
 
 A fast and modern graphql client library designed with simplicity in mind.
 
+[![pypi][pypi-image]][pypi-url]
+
+[pypi-image]: https://img.shields.io/pypi/v/python-graphy.svg?style=flat
+[pypi-url]: https://pypi.python.org/pypi/python-graphy
+
 NOTE: THIS PACKAGE IS STILL UNDER DEVELOPMENT.
 
 ## Getting Started

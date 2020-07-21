@@ -1,8 +1,6 @@
 import itertools
 from typing import Dict, Iterable, Tuple
 
-from requests import Response
-
 from graphy.client import Client
 from graphy.schema import Operation, SelectionField
 
@@ -16,16 +14,14 @@ class OperationProxy:
     def operation_name(self) -> str:
         return self.operation.name
 
-    def __call__(self, query: str, variables: Dict = None, operation_name: str = "", *args, **kwargs) -> Response:
+    def __call__(self, query: str, variables: Dict = None, operation_name: str = "", *args, **kwargs):
         if variables is None:
             variables = {}
-        return self.client.session.post(
+        return self.client.transporter.post(
             self.client.endpoint,
-            json={
-                "query": query,
-                "variables": variables,
-                "operationName": operation_name
-            }
+            query,
+            variables,
+            operation_name
         )
 
 
@@ -51,7 +47,7 @@ class ServiceProxy:
 
 class QueryOperationProxy(OperationProxy):
 
-    def __call__(self, select: Tuple[SelectionField] = None, where: Dict = None, *args, **kwargs) -> Response:
+    def __call__(self, select: Tuple[SelectionField] = None, where: Dict = None, *args, **kwargs):
         if select is None:
             select = self.operation.get_return_fields(self.client.schema.types)
             if select is None:
@@ -81,7 +77,7 @@ class QueryServiceProxy(ServiceProxy):
 
 class MutationOperationProxy(OperationProxy):
 
-    def __call__(self, select: Tuple[SelectionField] = None, data: Dict = None, *args, **kwargs) -> Response:
+    def __call__(self, select: Tuple[SelectionField] = None, data: Dict = None, *args, **kwargs):
         if data is None:
             raise ValueError("No Data specified")
         if select is None:

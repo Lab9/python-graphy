@@ -11,7 +11,7 @@ readme = (root_directory / "README.md").read_text(encoding="UTF-8")
 # This call to setup() does all the work
 setup(
     name="python-graphy",
-    version="0.0.6",
+    version="0.1.0",
     description="A fast and modern graphql client library designed with simplicity in mind.",
     long_description=readme,
     long_description_content_type="text/markdown",
@@ -27,7 +27,7 @@ setup(
     keywords="python graphql client api",
     packages=["graphy"],
     include_package_data=True,
-    install_requires=["requests"],
+    install_requires=["requests==2.*", "promise==2.*"],
     entry_points={
         "console_scripts": [
             "graphy=graphy.cli:main"
