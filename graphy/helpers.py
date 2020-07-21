@@ -144,7 +144,7 @@ def __recursively_find_selection_fields(
             type_to_check = field.type.of_type
         else:
             type_to_check = field.type
-        field_name = find_defer_name_recursively(type_to_check)
+        field_name = field.name
         if is_scalar(type_to_check):
             args.append(field_name)
         elif is_list(type_to_check) or is_object(type_to_check) or is_non_null(type_to_check):
