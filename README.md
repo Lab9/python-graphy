@@ -120,9 +120,9 @@ Making a request with the async transporter returns a `Promise[Response]` with t
 Have a look at their [documentation](https://pypi.org/project/promise/).
 
 ```python
-from graphy import Client, AsyncTransporter
+from graphy import Client, PromiseTransporter
 
-client = Client("https://graphql-pokemon.now.sh/", transporter=AsyncTransporter())
+client = Client("https://graphql-pokemon.now.sh/", transporter=PromiseTransporter())
 
 client.query.pokemons(where={"first": 10})\
     .then(lambda r: r.json(), None)\

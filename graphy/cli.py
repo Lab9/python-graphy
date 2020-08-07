@@ -17,7 +17,7 @@ def main():
     from graphy import loaders
     import requests
     import json
-    result = loaders.get_raw_schema(args.inspect, requests.sessions.session())
+    result = loaders.request_schema(args.inspect, requests.sessions.session())
     print(json.dumps(result, indent=2))
 
 

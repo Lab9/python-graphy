@@ -15,14 +15,14 @@ def introspect_schema(endpoint: str, session: Session) -> Schema:
     :return: The dictionary with the schema
     :raises: a RequestException if the schema could not be received.
     """
-    schema_json = get_raw_schema(endpoint, session)
+    schema_json = request_schema(endpoint, session)
     logger.debug("Successfully received schema.")
     schema = Schema(schema_json)
     logger.debug("Successfully introspected schema.")
     return schema
 
 
-def get_raw_schema(endpoint: str, session: Session) -> Dict:
+def request_schema(endpoint: str, session: Session) -> Dict:
     """
     Makes a schema introspection and returns the resulting schema.
     The current query looks as following:

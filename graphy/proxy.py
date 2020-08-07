@@ -1,12 +1,11 @@
 import itertools
 from typing import Dict, Iterable, Tuple
 
-from graphy.client import Client
 from graphy.schema import Operation, SelectionField
 
 
 class OperationProxy:
-    def __init__(self, client: Client, operation: Operation):
+    def __init__(self, client, operation: Operation):
         self.client = client
         self.operation = operation
 
@@ -52,9 +51,9 @@ class QueryOperationProxy(OperationProxy):
             select = self.operation.get_return_fields(self.client.schema.types)
             if select is None:
                 raise ValueError("Missing field selection")
-        from graphy.builder import GraphQLQueryBuilder
+        from graphy.builder import GraphQLBuilder
         from graphy import helpers
-        query_builder = GraphQLQueryBuilder()
+        query_builder = GraphQLBuilder()
         if where is not None:
             variables = helpers.map_variables_to_types(where, self.operation)
             query_builder = query_builder.operation("query", name=self.operation_name, params=variables)
@@ -69,7 +68,7 @@ class QueryOperationProxy(OperationProxy):
 
 class QueryServiceProxy(ServiceProxy):
 
-    def __init__(self, client: Client):
+    def __init__(self, client):
         super(QueryServiceProxy, self).__init__({
             op.name: QueryOperationProxy(client, op) for op in client.schema.queries
         })
@@ -82,9 +81,9 @@ class MutationOperationProxy(OperationProxy):
             raise ValueError("No Data specified")
         if select is None:
             select = tuple()
-        from graphy.builder import GraphQLQueryBuilder
+        from graphy.builder import GraphQLBuilder
         from graphy import helpers
-        query_builder = GraphQLQueryBuilder()
+        query_builder = GraphQLBuilder()
         variables = helpers.map_variables_to_types(data, self.operation)
         query_builder = query_builder.operation("mutation", name=self.operation_name, params=variables)
         query_builder = query_builder.query(self.operation_name, params={key: f"${key}" for key in data.keys()})
@@ -96,7 +95,7 @@ class MutationOperationProxy(OperationProxy):
 
 class MutationServiceProxy(ServiceProxy):
 
-    def __init__(self, client: Client):
+    def __init__(self, client):
         super(MutationServiceProxy, self).__init__({
             op.name: MutationOperationProxy(client, op) for op in client.schema.mutations
         })

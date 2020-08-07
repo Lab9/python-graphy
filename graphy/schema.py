@@ -3,19 +3,19 @@ from typing import Dict, List, Tuple
 
 class Schema:
     def __init__(self, raw: Dict):
-        from graphy import helpers
+        from graphy import parser
         # graphql schema properties
         self.raw_schema = raw.get("data", {}).get("__schema", {})
-        self.query_type: str = helpers.parse_query_type(self.raw_schema)
-        self.mutation_type: str = helpers.parse_mutation_type(self.raw_schema)
-        self.subscription_type: str = helpers.parse_subscription_type(self.raw_schema)
-        self.types: Dict[str, Type] = helpers.parse_types(self.raw_schema.get("types", []))
-        self.directives: Dict[str, Directive] = helpers.parse_directives(self.raw_schema.get("directives", []))
+        self.query_type: str = parser.parse_query_type(self.raw_schema)
+        self.mutation_type: str = parser.parse_mutation_type(self.raw_schema)
+        self.subscription_type: str = parser.parse_subscription_type(self.raw_schema)
+        self.types: Dict[str, Type] = parser.parse_types(self.raw_schema.get("types", []))
+        self.directives: Dict[str, Directive] = parser.parse_directives(self.raw_schema.get("directives", []))
 
         # custom schema properties
-        self.queries: List[Operation] = helpers.parse_operations(self.types, self.query_type)
-        self.mutations: List[Operation] = helpers.parse_operations(self.types, self.mutation_type)
-        self.subscriptions: List[Operation] = helpers.parse_operations(self.types, self.subscription_type)
+        self.queries: List[Operation] = parser.parse_operations(self.types, self.query_type)
+        self.mutations: List[Operation] = parser.parse_operations(self.types, self.mutation_type)
+        self.subscriptions: List[Operation] = parser.parse_operations(self.types, self.subscription_type)
 
 
 class Operation:
@@ -36,11 +36,11 @@ class Operation:
 
 class Directive:
     def __init__(self, raw_directive: Dict):
-        from graphy import helpers
+        from graphy import parser
         self.name: str = raw_directive.get("name")
         self.description: str = raw_directive.get("description")
         self.locations: List[str] = raw_directive.get("locations", [])
-        self.args: Dict[str, Argument] = helpers.parse_arguments(raw_directive.get("args", []))
+        self.args: Dict[str, Argument] = parser.parse_arguments(raw_directive.get("args", []))
 
 
 class Argument:
@@ -72,10 +72,10 @@ class Type:
 
 class TypeField:
     def __init__(self, raw_field: Dict):
-        from graphy import helpers
+        from graphy import parser
         self.name = raw_field.get("name")
         self.description = raw_field.get("description")
-        self.args: Dict[str, Argument] = helpers.parse_arguments(raw_field.get("args", []))
+        self.args: Dict[str, Argument] = parser.parse_arguments(raw_field.get("args", []))
         self.type: TypeDefer = TypeDefer(raw_field.get("type")) if raw_field.get("type") is not None else None
         self.is_deprecated: bool = raw_field.get("isDeprecated")
         self.deprecation_reason: str = raw_field.get("deprecationReason")

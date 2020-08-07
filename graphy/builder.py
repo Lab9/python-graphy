@@ -3,7 +3,7 @@ from typing import Dict, Union, List, Tuple
 from graphy.schema import SelectionField
 
 
-class GraphQLQueryBuilder:
+class GraphQLBuilder:
     def __init__(self):
         self.object: str = ""
         self.return_field: str = ""
