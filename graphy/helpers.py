@@ -68,12 +68,21 @@ def __recursively_find_selection_fields(
         all_types: Dict[str, SchemaType],
         curr_depth: int,
         max_depth: int
-) -> Tuple[SelectionField]:
+) -> Union[Tuple[SelectionField], None]:
+    """
+
+    :param type_name:
+    :param all_types:
+    :param curr_depth:
+    :param max_depth:
+    :return:
+    """
     if curr_depth >= max_depth:
-        return None
+        return None  # prevention of stack overflow
+
     field_type: SchemaType = all_types.get(type_name)
     if field_type is None:
-        return None
+        return None  # no return type was found so stop right there
 
     args = []
     kwargs = {}
@@ -81,7 +90,8 @@ def __recursively_find_selection_fields(
     for field in field_type.fields:
         if field is None:
             continue
-        if is_non_null(field.type):
+
+        if field.type and field.type.is_non_null():
             type_to_check = field.type.of_type
         else:
             type_to_check = field.type

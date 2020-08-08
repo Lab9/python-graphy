@@ -28,7 +28,7 @@ class Transporter:
 
     def post(
             self,
-            address: str,
+            endpoint: str,
             query: str,
             variables: Dict,
             operation_name: str,
@@ -37,19 +37,18 @@ class Transporter:
         """
         Wrapper for the requests.post() method.
 
-        :param address: holds the request endpoint
+        :param endpoint: holds the request endpoint
         :param query: holds the query string
         :param variables: holds the query variables if there are any
-        :param operation_name: holds an optional operation name
+        :param operation_name: holds the operation name. Used for reading response data
         :param settings: holds the clients settings
         :return:
         """
         response = self.session.post(
-            address,
+            endpoint,
             json={
                 "query": query,
-                "variables": variables,
-                "operationName": operation_name
+                "variables": variables
             },
             timeout=self.operation_timeout
         )
@@ -58,7 +57,10 @@ class Transporter:
             return response
         else:
             response_json: Dict = response.json()
-            return response_json[settings.default_response_key]
+            try:
+                return response_json[settings.default_response_key][operation_name]
+            except KeyError:
+                raise KeyError("Key not found in response. Try to set Settings(return_requests_response=True)")
 
 
 class PromiseTransporter(Transporter):
@@ -69,7 +71,7 @@ class PromiseTransporter(Transporter):
 
     def post(
             self,
-            address: str,
+            endpoint: str,
             query: str,
             variables: Dict,
             operation_name: str,
@@ -80,7 +82,7 @@ class PromiseTransporter(Transporter):
         """
         return Promise(
             lambda resolve, reject: resolve(super(PromiseTransporter, self).post(
-                address, query, variables, operation_name, settings
+                endpoint, query, variables, operation_name, settings
             ))
         )
 
@@ -93,7 +95,7 @@ class AsyncTransporter(Transporter):
 
     async def post(
             self,
-            address: str,
+            endpoint: str,
             query: str,
             variables: Dict,
             operation_name: str,
@@ -102,4 +104,4 @@ class AsyncTransporter(Transporter):
         """
         This method wraps the parents post method in an awaitable.
         """
-        return super().post(address, query, variables, operation_name, settings)
+        return super().post(endpoint, query, variables, operation_name, settings)

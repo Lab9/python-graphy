@@ -1,3 +1,3 @@
 from logging import getLogger
 
-logger = getLogger("graphy")
+logger = getLogger("graphy")  # the package logger

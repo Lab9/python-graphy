@@ -8,7 +8,8 @@ class Settings:
             self,
             max_recursion_depth=2,
             base_response_key="data",
-            return_requests_response=False
+            return_requests_response=False,
+            disable_selection_lookup=False
     ):
         """
         Instantiate a new Settings instance to be used by a client.
@@ -16,7 +17,9 @@ class Settings:
         :param max_recursion_depth: holds the max depth for looking up return fields when no selection is passed by.
         :param base_response_key: holds the base response key. This is probably "data" in most cases.
         :param return_requests_response: True if you want the requests response object. If False will try to parse json.
+        :param disable_selection_lookup: Set to True if you want no automatic lookup when no selection was passed by.
         """
         self.max_recursion_depth = max_recursion_depth
         self.default_response_key = base_response_key
         self.return_requests_response = return_requests_response
+        self.disable_selection_lookup = disable_selection_lookup
