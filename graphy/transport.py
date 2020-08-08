@@ -54,7 +54,11 @@ class Transporter:
             timeout=self.operation_timeout
         )
 
-        return response if settings.return_requests_response else response.json()
+        if settings.return_requests_response:
+            return response
+        else:
+            response_json: Dict = response.json()
+            return response_json[settings.default_response_key]
 
 
 class PromiseTransporter(Transporter):
