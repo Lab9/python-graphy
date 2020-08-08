@@ -1,6 +1,6 @@
 from typing import Dict, List, Tuple, Union
 
-from graphy.builder import SelectionField
+from graphy.builder import SelectedField
 from graphy.loaders import request_schema
 from graphy.settings import Settings
 from graphy.transport import Transporter
@@ -52,9 +52,9 @@ class Operation:
         self.description = field.description
         self.arguments = helpers.adapt_arguments(field.args)
         self.return_type = field.type
-        self._return_fields: Union[Tuple[SelectionField], None] = None
+        self._return_fields: Union[Tuple[SelectedField], None] = None
 
-    def get_return_fields(self, all_types: "Dict[str, SchemaType]") -> Tuple[SelectionField]:
+    def get_return_fields(self, all_types: "Dict[str, SchemaType]") -> Tuple[SelectedField]:
         """
         Recursively look up a certain amount of return fields depending on the current recursion depth.
         The depth can be set via the settings.

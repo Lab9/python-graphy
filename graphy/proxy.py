@@ -3,7 +3,7 @@ from typing import Dict, Iterable, Tuple
 
 from graphy import helpers
 from graphy.builder import GraphQLBuilder
-from graphy.builder import SelectionField
+from graphy.builder import SelectedField
 from graphy.schema import Operation
 
 
@@ -105,7 +105,7 @@ class QueryOperationProxy(OperationProxy):
     I'm open for any suggestions and improvements.
     """
 
-    def __call__(self, select: Tuple[SelectionField] = None, where: Dict = None, *args, **kwargs):
+    def __call__(self, select: Tuple[SelectedField] = None, where: Dict = None, *args, **kwargs):
         """
         This method is used to build the query request.
 
@@ -160,7 +160,7 @@ class MutationOperationProxy(OperationProxy):
     I'm open for any suggestions and improvements.
     """
 
-    def __call__(self, select: Tuple[SelectionField] = None, data: Dict = None, *args, **kwargs):
+    def __call__(self, select: Tuple[SelectedField] = None, data: Dict = None, *args, **kwargs):
         """
         This method is used to build the mutation request.
 

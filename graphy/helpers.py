@@ -1,6 +1,6 @@
 from typing import Dict, Union, Tuple
 
-from graphy.builder import SelectionField
+from graphy.builder import SelectedField
 from graphy.schema import SchemaType, Operation, Argument, TypeDefer, OperationArgument
 
 
@@ -57,7 +57,7 @@ def adapt_return_fields(
         field_type: TypeDefer,
         all_types: Dict[str, SchemaType],
         max_depth: int
-) -> Tuple[SelectionField]:
+) -> Tuple[SelectedField]:
     base_return_type_name = find_defer_name_recursively(field_type)
     all_fields = __recursively_find_selection_fields(base_return_type_name, all_types, 0, max_depth)
     return all_fields if all_fields is not None and len(all_fields) != 0 else None
@@ -68,7 +68,7 @@ def __recursively_find_selection_fields(
         all_types: Dict[str, SchemaType],
         curr_depth: int,
         max_depth: int
-) -> Union[Tuple[SelectionField], None]:
+) -> Union[Tuple[SelectedField], None]:
     """
 
     :param type_name:
