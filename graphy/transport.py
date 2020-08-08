@@ -1,9 +1,10 @@
-from typing import Dict
+from typing import Dict, Union
 
 import requests
 from promise import Promise
 from requests import Session, Response
 
+from graphy.settings import Settings
 from graphy.utils import get_version
 
 
@@ -25,7 +26,14 @@ class Transporter:
         self.session: Session = session or requests.sessions.session()
         self.session.headers["User-Agent"] = f"Graphy/{get_version()} (https://pypi.org/project/python-graphy/)"
 
-    def post(self, address: str, query: str, variables: Dict, operation_name: str) -> Response:
+    def post(
+            self,
+            address: str,
+            query: str,
+            variables: Dict,
+            operation_name: str,
+            settings: Settings
+    ) -> Union[Response, Dict]:
         """
         Wrapper for the requests.post() method.
 
@@ -33,9 +41,10 @@ class Transporter:
         :param query: holds the query string
         :param variables: holds the query variables if there are any
         :param operation_name: holds an optional operation name
+        :param settings: holds the clients settings
         :return:
         """
-        return self.session.post(
+        response = self.session.post(
             address,
             json={
                 "query": query,
@@ -45,6 +54,8 @@ class Transporter:
             timeout=self.operation_timeout
         )
 
+        return response if settings.return_requests_response else response.json()
+
 
 class PromiseTransporter(Transporter):
     """
@@ -52,13 +63,20 @@ class PromiseTransporter(Transporter):
     Use this when you do not want to wait for the request to finish and continue to run with your code.
     """
 
-    def post(self, address: str, query: str, variables: Dict, operation_name: str) -> Promise[Response]:
+    def post(
+            self,
+            address: str,
+            query: str,
+            variables: Dict,
+            operation_name: str,
+            settings: Settings
+    ) -> Promise[Union[Response, Dict]]:
         """
         This method wraps the parents post method in a Promise.
         """
         return Promise(
             lambda resolve, reject: resolve(super(PromiseTransporter, self).post(
-                address, query, variables, operation_name
+                address, query, variables, operation_name, settings
             ))
         )
 
@@ -69,5 +87,15 @@ class AsyncTransporter(Transporter):
     Use this for async programming.
     """
 
-    async def post(self, address: str, query: str, variables: Dict, operation_name: str) -> Response:
-        return super().post(address, query, variables, operation_name)
+    async def post(
+            self,
+            address: str,
+            query: str,
+            variables: Dict,
+            operation_name: str,
+            settings: Settings
+    ) -> Union[Response, Dict]:
+        """
+        This method wraps the parents post method in an awaitable.
+        """
+        return super().post(address, query, variables, operation_name, settings)

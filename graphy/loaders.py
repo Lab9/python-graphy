@@ -3,23 +3,6 @@ from typing import Dict
 from requests import Session
 
 from graphy.logger import logger
-from graphy.schema import Schema
-
-
-def introspect_schema(endpoint: str, session: Session) -> Schema:
-    """
-    Makes a schema introspection and returns the resulting schema.
-
-    :param endpoint: holds the servers endpoint -> http://...
-    :param session: holds the session object to use
-    :return: The dictionary with the schema
-    :raises: a RequestException if the schema could not be received.
-    """
-    schema_json = request_schema(endpoint, session)
-    logger.debug("Successfully received schema.")
-    schema = Schema(schema_json)
-    logger.debug("Successfully introspected schema.")
-    return schema
 
 
 def request_schema(endpoint: str, session: Session) -> Dict:
@@ -227,5 +210,6 @@ def request_schema(endpoint: str, session: Session) -> Dict:
             "variables": variables
         }
     )
+    logger.debug(f"SCHEMA INTROSPECTION - {introspection_response.status_code} - POST - {endpoint}")
     introspection_response.raise_for_status()
     return introspection_response.json()

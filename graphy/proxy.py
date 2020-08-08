@@ -1,7 +1,8 @@
 import itertools
 from typing import Dict, Iterable, Tuple
 
-from graphy.schema import Operation, SelectionField
+from graphy.builder import SelectionField
+from graphy.schema import Operation
 
 
 class OperationProxy:
@@ -20,7 +21,8 @@ class OperationProxy:
             self.client.endpoint,
             query,
             variables,
-            operation_name
+            operation_name,
+            self.operation.settings
         )
 
 

@@ -1,6 +1,16 @@
 from typing import Dict, Union, List, Tuple
 
-from graphy.schema import SelectionField
+
+class SelectionField:
+    def __init__(self, name: str, children: List = None):
+        self.name: str = name
+        self.children: List = children
+
+    def __str__(self):
+        result = self.name
+        if self.children:
+            result += " { " + " ".join([str(c) for c in self.children]) + " } "
+        return result
 
 
 class GraphQLBuilder:
@@ -60,7 +70,7 @@ class GraphQLBuilder:
         return self
 
     def generate(self) -> str:
-        from graphy import helpers
+        from graphy import utils
         if self.fragment_field != '':
             self.object = f'{self.fragment_field} {self.return_field}'
         else:
@@ -71,7 +81,7 @@ class GraphQLBuilder:
             elif self.object == '':
                 self.object = self.operation_field + ' { ' + self.query_field + ' ' + self.return_field + ' }'
 
-        return helpers.remove_duplicate_spaces(self.object)
+        return utils.remove_duplicate_spaces(self.object)
 
 
 def map_value(value: Union[str, int, float, bool]) -> str:

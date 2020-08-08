@@ -1,10 +1,7 @@
 from typing import Dict, Union, Tuple
 
-from graphy.schema import Type, Operation, Argument, TypeDefer, SelectionField
-
-
-def remove_duplicate_spaces(query: str) -> str:
-    return " ".join(query.split())
+from graphy.builder import SelectionField
+from graphy.schema import SchemaType, Operation, Argument, TypeDefer, OperationArgument
 
 
 def map_variables_to_types(variables: Dict, operation: Operation) -> Dict[str, str]:
@@ -13,7 +10,7 @@ def map_variables_to_types(variables: Dict, operation: Operation) -> Dict[str, s
         arg = operation.arguments.get(key)
         if not arg:
             raise ValueError(f"Argument '{key}' is not supported by operation '{operation.name}'.")
-        result[f"${key}"] = arg
+        result[f"${key}"] = arg.value
     return result
 
 
@@ -46,33 +43,35 @@ def find_defer_name_recursively(defer: TypeDefer) -> Union[str, None]:
         return defer.name
 
 
-def adapt_arguments(args: Dict[str, Argument]) -> Dict[str, str]:
+def adapt_arguments(args: Dict[str, Argument]) -> Dict[str, OperationArgument]:
     result = {}
     for name, arg in args.items():
         type_name = find_defer_name_recursively(arg.type)
-        if is_non_null(arg.type):
-            type_name += "!"
-        result[name] = type_name
+        required = arg.type.is_non_null()
+        op_arg = OperationArgument(name, type_name, required)
+        result[name] = op_arg
     return result
 
 
-def adapt_return_fields(field_type: TypeDefer, all_types: Dict[str, Type]) -> Tuple[SelectionField]:
+def adapt_return_fields(
+        field_type: TypeDefer,
+        all_types: Dict[str, SchemaType],
+        max_depth: int
+) -> Tuple[SelectionField]:
     base_return_type_name = find_defer_name_recursively(field_type)
-    all_fields = __recursively_find_selection_fields(base_return_type_name, all_types)
+    all_fields = __recursively_find_selection_fields(base_return_type_name, all_types, 0, max_depth)
     return all_fields if all_fields is not None and len(all_fields) != 0 else None
-
-
-MAX_RECURSION_DEPTH = 2
 
 
 def __recursively_find_selection_fields(
         type_name: str,
-        all_types: Dict[str, Type],
-        curr_depth=0
+        all_types: Dict[str, SchemaType],
+        curr_depth: int,
+        max_depth: int
 ) -> Tuple[SelectionField]:
-    if curr_depth >= MAX_RECURSION_DEPTH:
+    if curr_depth >= max_depth:
         return None
-    field_type: Type = all_types.get(type_name)
+    field_type: SchemaType = all_types.get(type_name)
     if field_type is None:
         return None
 
@@ -91,7 +90,7 @@ def __recursively_find_selection_fields(
             args.append(field_name)
         elif is_list(type_to_check) or is_object(type_to_check) or is_non_null(type_to_check):
             sub_type = find_defer_name_recursively(type_to_check)
-            sub_fields = __recursively_find_selection_fields(sub_type, all_types, curr_depth=curr_depth + 1)
+            sub_fields = __recursively_find_selection_fields(sub_type, all_types, curr_depth + 1, max_depth)
             if sub_fields is not None:
                 kwargs[field_name] = sub_fields
 

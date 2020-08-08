@@ -1,19 +1,21 @@
 from graphy.proxy import MutationServiceProxy, QueryServiceProxy
+from graphy.schema import Schema
+from graphy.settings import Settings
 from graphy.transport import Transporter
 
 
 class Client(object):
-    def __init__(self, endpoint: str, transporter=None):
+    def __init__(self, endpoint: str, transporter=None, settings=None):
         if not endpoint:
             raise ValueError("No Endpoint specified.")
         self.endpoint = endpoint
         self.transporter: Transporter = transporter or Transporter()
+        self.settings: Settings = settings or Settings()
 
         self._query_services = None
         self._mutation_services = None
 
-        from graphy import loaders
-        self.schema = loaders.introspect_schema(self.endpoint, self.transporter.session)
+        self.schema = Schema(self.endpoint, self.transporter, self.settings)
 
     @property
     def query(self) -> QueryServiceProxy:
