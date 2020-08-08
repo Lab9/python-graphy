@@ -20,6 +20,7 @@ setup(
     author_email="info@danielseifert.ch",
     license="MIT",
     classifiers=[
+        "Development Status :: 3 - Alpha",
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.7",
