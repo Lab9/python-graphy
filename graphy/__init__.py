@@ -5,4 +5,4 @@ from .schema import Schema
 from .settings import Settings
 from .transport import Transporter, PromiseTransporter, AsyncTransporter
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
