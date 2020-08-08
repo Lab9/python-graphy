@@ -11,16 +11,16 @@ class OperationArgument:
     Represents an operation argument.
     """
 
-    def __init__(self, name: str, type: str, is_required=False):
+    def __init__(self, name: str, arg_type_name: str, is_required=False):
         """
         Instantiate a new OperationArgument
 
         :param name: holds the argument name
-        :param type: holds the argument type
+        :param arg_type_name: holds the argument type
         :param is_required: true if the argument must not be null
         """
         self.key = name
-        self._value = type
+        self._value = arg_type_name
         self.required = is_required
 
     @property
