@@ -24,11 +24,18 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.7",
+        "Framework :: AsyncIO",
+        "Natural Language :: English",
     ],
     keywords="python graphql client api async promise graph requests",
-    packages=["graphy"],
+    packages=[
+        "graphy"
+    ],
     include_package_data=True,
-    install_requires=["requests==2.*", "promise==2.*"],
+    install_requires=[
+        "requests==2.*",
+        "promise==2.*"
+    ],
     entry_points={
         "console_scripts": [
             "graphy=graphy.cli:main"
