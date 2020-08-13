@@ -3,9 +3,13 @@
 A fast and modern graphql client library designed with simplicity in mind.
 
 [![pypi][pypi-image]][pypi-url]
+[![GitHub license][github-license-image]][github-license-url]
 
 [pypi-image]: https://img.shields.io/pypi/v/python-graphy.svg?style=flat
 [pypi-url]: https://pypi.python.org/pypi/python-graphy
+
+[github-license-image]: https://img.shields.io/github/license/Lab9/python-graphy.svg
+[github-license-url]: https://github.com/Lab9/python-graphy/blob/master/LICENSE
 
 NOTE: THIS PACKAGE IS STILL UNDER DEVELOPMENT.
 
