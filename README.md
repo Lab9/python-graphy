@@ -38,8 +38,11 @@ The Documentation covers the following points:
 * [Settings](#settings)
     * [max_recursion_depth](#max_recursion_depth)
     * [base_response_key](#base_response_key)
+    * [base_payload_key](#base_payload_key)
     * [return_requests_response](#return_requests_response)
     * [disable_selection_lookup](#disable_selection_lookup)
+    * [disable_subscriptions](#disable_subscriptions)
+    * [return_full_subscription_body](#return_full_subscription_body)
 * [CLI](#cli)
 
 ### Query
@@ -165,6 +168,7 @@ settings = Settings(max_recursion_depth=5)  # Due to performance reasons I do no
 client = Client("https://graphql-pokemon.now.sh/", settings=settings)
 ```
 
+
 #### base_response_key
 The base_response_key can be changed for setting the base key that is being used to get the data from the server.
 Default is "data".
@@ -172,6 +176,17 @@ Default is "data".
 from graphy import Client, Settings
 
 settings = Settings(base_response_key="my_custom_data_key")
+
+client = Client("https://graphql-pokemon.now.sh/", settings=settings)
+```
+
+#### base_payload_key
+The base_payload_key can be changed for setting the base key that is being used to read the data from the websocket response.
+Default is "payload".
+```python
+from graphy import Client, Settings
+
+settings = Settings(base_payload_key="my_custom_payload_key")
 
 client = Client("https://graphql-pokemon.now.sh/", settings=settings)
 ```
@@ -194,6 +209,18 @@ Default is False.
 from graphy import Client, Settings
 
 settings = Settings(disable_selection_lookup=True)
+
+client = Client("https://graphql-pokemon.now.sh/", settings=settings)
+```
+
+
+#### return_full_subscription_body
+The return_full_subscription_body can be set to True if you want to get the full websocket response instead of only
+the data.
+```python
+from graphy import Client, Settings
+
+settings = Settings(return_full_subscription_body=True)
 
 client = Client("https://graphql-pokemon.now.sh/", settings=settings)
 ```

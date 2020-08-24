@@ -1,3 +1,6 @@
+from typing import Union
+
+
 def get_version() -> str:
     """
     Get the version from graphy
@@ -14,3 +17,17 @@ def remove_duplicate_spaces(string: str) -> str:
     :return: a string with no double spaces.
     """
     return " ".join(string.split())
+
+
+def adapt_websocket_endpoint(endpoint: str) -> Union[str, None]:
+    """
+    Adapt the given http[s] endpoint to a websocket endpoint.
+    :param endpoint: holds the endpoints host address with protocol
+    :return: the websocket url
+    """
+    if endpoint.startswith("https://"):
+        return "wss://" + endpoint.replace("https://", "")
+    elif endpoint.startswith("http://"):
+        return "ws://" + endpoint.replace("http://", "")
+    else:
+        return None
