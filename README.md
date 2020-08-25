@@ -54,7 +54,6 @@ The Documentation covers the following points:
     * [base_payload_key](#base_payload_key)
     * [return_requests_response](#return_requests_response)
     * [disable_selection_lookup](#disable_selection_lookup)
-    * [disable_subscriptions](#disable_subscriptions)
     * [return_full_subscription_body](#return_full_subscription_body)
 * [CLI](#cli)
 
