@@ -34,7 +34,8 @@ setup(
     include_package_data=True,
     install_requires=[
         "requests==2.*",
-        "promise==2.*"
+        "promise==2.*",
+        "websockets==8.1"
     ],
     entry_points={
         "console_scripts": [

@@ -1,9 +1,14 @@
 import itertools
-from typing import Dict, Iterable, Tuple
+import json
+import uuid
+from typing import Dict, Iterable, Tuple, Callable
+
+from websockets import connect
 
 from graphy import helpers
 from graphy.builder import GraphQLBuilder
 from graphy.builder import SelectedField
+from graphy.logger import logger
 from graphy.schema import Operation
 
 
@@ -179,6 +184,10 @@ class MutationOperationProxy(OperationProxy):
         """
         if data is None:
             raise ValueError("No Data specified")
+
+        if select is None and not self.operation.settings.disable_selection_lookup:
+            select = self.operation.get_return_fields(self.client.schema.types)
+
         query_builder = GraphQLBuilder()
         variables = helpers.map_variables_to_types(data, self.operation)
         query_builder = query_builder.operation("mutation", name=self.name, params=variables)
@@ -199,4 +208,94 @@ class MutationServiceProxy(ServiceProxy):
         """
         super(MutationServiceProxy, self).__init__({
             op.name: MutationOperationProxy(client, op) for op in client.schema.mutations
+        })
+
+
+class SubscriptionOperationProxy(OperationProxy):
+    """
+    The operation proxy for a subscription.
+    The call method was slightly changed for better readability which makes it easier to use as well.
+    I'm open for any suggestions and improvements.
+    """
+
+    def __init__(self, client, operation):
+        super(SubscriptionOperationProxy, self).__init__(client, operation)
+        self.client = client
+
+    async def __call__(self, select: Tuple[SelectedField] = None, handle: Callable = None, *args, **kwargs):
+        """
+        The heart piece of a subscription.
+
+        First this method is going to take care of the field selection.
+        Only if no fields were selected and it was permitted by the user, the fields will be automatically selected.
+
+        Surely the next step is to create the subscription query message.
+
+        Finally we establish a new connection to the websocket server and initialize the connection
+        with the predefined connection_init_message.
+        Then we send our request and handle the incoming messages.
+
+        :param select: holds the field selection.
+        :param handle: holds a callable that will we called with every incoming message of type "data"
+        :param args: holds additional arguments
+        :param kwargs: holds additional keyword arguments.
+        """
+
+        if self.client.ws_endpoint is None:
+            raise ValueError("ws_endpoint is None. Please set the value manually in the client.")
+
+        if select is None and not self.operation.settings.disable_selection_lookup:
+            select = self.operation.get_return_fields(self.client.schema.types)
+
+        subscription_builder = GraphQLBuilder()
+
+        subscription_builder = subscription_builder.operation("subscription").query(self.name)
+
+        subscription_builder = subscription_builder.fields(select)
+        query_string = subscription_builder.generate()
+
+        connection_init_message = json.dumps({
+            "type": "connection_init",
+            self.client.settings.default_payload_key: {}
+        })
+
+        request_body = {
+            "query": query_string,
+            "variables": None
+        }
+
+        request_message = json.dumps({
+            "type": "start",
+            "id": f"SUBSCRIPTION-{self.name}-{uuid.uuid4()}".upper(),
+            "payload": request_body
+        })
+
+        async with connect(self.client.ws_endpoint, subprotocols=["graphql-ws"]) as websocket:
+            await websocket.send(connection_init_message)  # first message needs to initiate the connection
+            await websocket.send(request_message)  # secondly we can send the query.
+            async for response_message in websocket:
+                response_body = json.loads(response_message)
+                response_type = response_body["type"]
+                if response_type == "connection_ack":
+                    logger.info("The websocket server acknowledged the connection.")
+                elif response_type == "data":
+                    if self.client.settings.return_full_subscription_body:
+                        handle(response_body)
+                    else:
+                        response_payload = response_body[self.client.settings.default_payload_key]
+                        handle(response_payload[self.client.settings.default_response_key][self.name])
+                else:
+                    logger.warning(f"Unknown response type: '{response_type}'")
+
+
+class SubscriptionServiceProxy(ServiceProxy):
+    """ The subscription service proxy holds all subscription operations """
+
+    def __init__(self, client):
+        """
+        Instantiate a new SubscriptionServiceProxy.
+        :param client: holds the client
+        """
+        super(SubscriptionServiceProxy, self).__init__({
+            op.name: SubscriptionOperationProxy(client, op) for op in client.schema.subscriptions
         })
