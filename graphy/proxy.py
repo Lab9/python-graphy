@@ -184,6 +184,10 @@ class MutationOperationProxy(OperationProxy):
         """
         if data is None:
             raise ValueError("No Data specified")
+
+        if select is None and not self.operation.settings.disable_selection_lookup:
+            select = self.operation.get_return_fields(self.client.schema.types)
+
         query_builder = GraphQLBuilder()
         variables = helpers.map_variables_to_types(data, self.operation)
         query_builder = query_builder.operation("mutation", name=self.name, params=variables)

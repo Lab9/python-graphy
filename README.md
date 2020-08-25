@@ -97,13 +97,41 @@ client = Client("https://some-host.com/authentication")
 
 response = client.mutation.register(data={"email": "foo@bar.com", "password": "987654321"})
 ```
-Mind that the select keyword is optional in mutations but can still be passed by.
 
 ### Subscription
-Subscriptions are not yet available
+Sometimes you want to execute things when something - an action - happened on the server.
+In those cases, you can subscribe to an event.
+For subscribing to an endpoint, I am using the asyncio `websockets` library.
+So have a look at their [documentation](https://pypi.org/project/websockets/) for clarification.
+
+Here is a basic example
+```python
+import asyncio
+from graphy import Client
+
+client = Client("http://your-host:8080")  # remains the same
+
+def on_event(data: dict):
+    # ... do something with the data
+    print(data)
+
+asyncio.run(client.subscription.my_subscription(handle=on_event))  # the asyncio.run() function is important!
+```
+
+#### Different Websocket endpoint
+If no websocket endpoint was specified, it gets adapted based on the given request host.
+for example `http://localhost:3000` becomes `ws://localhost:3000`.
+Same goes for secured connections: `https` becomes `wss`.
+But it may be, that you have different endpoints. Therefor you can specify the websocket endpoint
+manually.
+```python
+from graphy import Client
+
+client = Client("http://your-host:8080", ws_endpoint="wss://your-other-host:3000")
+```
 
 ### Transporter
-For making requests, we use a transporter.
+For making requests, we use a transporter. (Irrelevant for Websockets.)
 
 If none is given, a new one will be created.
 
@@ -168,7 +196,6 @@ settings = Settings(max_recursion_depth=5)  # Due to performance reasons I do no
 client = Client("https://graphql-pokemon.now.sh/", settings=settings)
 ```
 
-
 #### base_response_key
 The base_response_key can be changed for setting the base key that is being used to get the data from the server.
 Default is "data".
@@ -212,7 +239,6 @@ settings = Settings(disable_selection_lookup=True)
 
 client = Client("https://graphql-pokemon.now.sh/", settings=settings)
 ```
-
 
 #### return_full_subscription_body
 The return_full_subscription_body can be set to True if you want to get the full websocket response instead of only
